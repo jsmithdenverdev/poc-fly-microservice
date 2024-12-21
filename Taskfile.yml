@@ -32,15 +32,16 @@ tasks:
   health:
     desc: Check service health
     cmds:
-      - curl -s {{.API_URL}}/health | jq
+      - curl -s {{.API_URL}}/health | jq '.'
 
   create:item:
     desc: Create a new item
     cmds:
+      - echo "{{.CLI_ARGS}}"
       - |
         curl -s -X POST {{.API_URL}}/items \
           -H "Content-Type: application/json" \
-          -d '{"name":"{{.CLI_ARGS}}"}'| jq
+          -d '{"name":"{{.CLI_ARGS}}"}' | jq '.'
     requires:
       vars: [CLI_ARGS]
     silent: true
@@ -48,7 +49,7 @@ tasks:
   list:items:
     desc: List all items
     cmds:
-      - curl -s {{.API_URL}}/items/ | jq
+      - curl -s {{.API_URL}}/items/ | jq '.'
     silent: true
 
   build:
@@ -66,6 +67,16 @@ tasks:
         else
           echo "golangci-lint is not installed"
         fi
+
+  deploy:
+    desc: Deploy the application to Fly.io
+    cmds:
+      - flyctl deploy
+    env:
+      FLY_API_TOKEN: '{{.FLY_API_TOKEN}}'
+    preconditions:
+      - sh: command -v flyctl
+        msg: "flyctl is not installed. Please install it first: https://fly.io/docs/hands-on/install-flyctl/"
 
   # Example usage:
   # task create:item -- "My Test Item"
