@@ -7,6 +7,7 @@ A prototype Go microservice demonstrating Fly.io deployment with scale-to-zero c
 - Auto-shutdown after 5 minutes of inactivity
 - Scale-to-zero configuration for both service and database
 - Flat package design for simplicity
+- Remote debugging support with Delve
 
 ## Prerequisites
 - Go 1.21 or later
@@ -48,6 +49,39 @@ task list:items
 task health
 ```
 
+### Debugging
+
+The application runs with Delve debugger enabled. You can connect to it using your IDE:
+
+#### VS Code
+Add the following configuration to your `.vscode/launch.json`:
+```json
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Connect to Docker",
+            "type": "go",
+            "request": "attach",
+            "mode": "remote",
+            "remotePath": "/app",
+            "port": 40000,
+            "host": "127.0.0.1"
+        }
+    ]
+}
+```
+
+#### GoLand
+1. Go to Run -> Edit Configurations
+2. Add New Configuration -> Go Remote
+3. Set the following:
+   - Host: `localhost`
+   - Port: `40000`
+   - Path mappings: 
+     - Local: `$PROJECT_DIR$`
+     - Remote: `/app`
+
 ## API Endpoints
 
 - `GET /health` - Health check endpoint
@@ -70,6 +104,4 @@ The development environment uses Docker Compose with hot-reload capabilities. Th
 
 ## Deployment
 ```bash
-# Deploy to Fly.io
 fly deploy
-```
