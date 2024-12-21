@@ -5,24 +5,22 @@ vars:
 
 tasks:
   default:
-    cmds:
-      - task -l
-    silent: true
+    deps: [dev]
 
   dev:
     desc: Start the development environment
     cmds:
-      - docker compose up --build
+      - docker-compose up --build
 
   dev:down:
     desc: Stop and remove development containers
     cmds:
-      - docker compose down
+      - docker-compose down
 
   dev:clean:
     desc: Stop containers and remove volumes
     cmds:
-      - docker compose down -v
+      - docker-compose down -v
 
   test:
     desc: Run tests
@@ -36,6 +34,8 @@ tasks:
 
   create:item:
     desc: Create a new item
+    vars:
+      API_URL: '{{default "http://localhost:8080" .API_URL}}'
     cmds:
       - echo "{{.CLI_ARGS}}"
       - |
@@ -53,9 +53,11 @@ tasks:
     silent: true
 
   build:
-    desc: Build the application
+    desc: Build Docker image for specified environment (debug/dev/prod)
     cmds:
-      - go build -o app
+      - docker build --target {{.TARGET}} -t {{.DOCKER_IMAGE}}:{{.TARGET}} .
+    requires:
+      vars: [TARGET]
 
   lint:
     desc: Run linters
@@ -68,16 +70,33 @@ tasks:
           echo "golangci-lint is not installed"
         fi
 
-  deploy:
-    desc: Deploy the application to Fly.io
+  deploy:dev:
+    desc: Deploy the development version to Fly.io
     cmds:
-      - flyctl deploy
-    env:
-      FLY_API_TOKEN: '{{.FLY_API_TOKEN}}'
+      - DOCKER_TARGET=dev flyctl deploy --app {{.FLY_APP_NAME}}-dev
     preconditions:
       - sh: command -v flyctl
         msg: "flyctl is not installed. Please install it first: https://fly.io/docs/hands-on/install-flyctl/"
 
-  # Example usage:
-  # task create:item -- "My Test Item"
-  # task list:items
+  deploy:prod:
+    desc: Deploy the production version to Fly.io
+    cmds:
+      - DOCKER_TARGET=prod flyctl deploy --app {{.FLY_APP_NAME}}
+    preconditions:
+      - sh: command -v flyctl
+        msg: "flyctl is not installed. Please install it first: https://fly.io/docs/hands-on/install-flyctl/"
+
+  build:local:
+    desc: Build the local Docker image
+    cmds:
+      - docker build -t {{.DOCKER_IMAGE}}:local -f Dockerfile.local .
+
+  build:dev:
+    desc: Build the development Docker image
+    cmds:
+      - docker build -t {{.DOCKER_IMAGE}}:dev -f Dockerfile.dev .
+
+  build:prod:
+    desc: Build the production Docker image
+    cmds:
+      - docker build -t {{.DOCKER_IMAGE}}:prod -f Dockerfile.prod .

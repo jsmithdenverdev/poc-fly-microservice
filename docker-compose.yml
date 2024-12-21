@@ -1,17 +1,20 @@
+version: '3.8'
+
 services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
+      target: debug
     ports:
       - "8080:8080"
       - "40000:40000"
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/poc_service?sslmode=disable
+      - LOG_LEVEL=debug
     security_opt:
       - "seccomp:unconfined"
     cap_add:
       - SYS_PTRACE
-    environment:
-      - DATABASE_URL=postgres://postgres:postgres@db:5432/poc_service?sslmode=disable
     depends_on:
       db:
         condition: service_healthy
@@ -27,7 +30,7 @@ services:
             - Taskfile.yml
 
   db:
-    image: postgres:15-alpine
+    image: postgres:16-alpine
     ports:
       - "5432:5432"
     environment:
