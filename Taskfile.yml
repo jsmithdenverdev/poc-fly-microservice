@@ -1,0 +1,72 @@
+version: '3'
+
+vars:
+  API_URL: http://localhost:8080
+
+tasks:
+  default:
+    cmds:
+      - task -l
+    silent: true
+
+  dev:
+    desc: Start the development environment
+    cmds:
+      - docker compose up --build
+
+  dev:down:
+    desc: Stop and remove development containers
+    cmds:
+      - docker compose down
+
+  dev:clean:
+    desc: Stop containers and remove volumes
+    cmds:
+      - docker compose down -v
+
+  test:
+    desc: Run tests
+    cmds:
+      - go test -v ./...
+
+  health:
+    desc: Check service health
+    cmds:
+      - curl -s {{.API_URL}}/health | jq
+
+  create:item:
+    desc: Create a new item
+    cmds:
+      - |
+        curl -s -X POST {{.API_URL}}/items \
+          -H "Content-Type: application/json" \
+          -d '{"name":"{{.CLI_ARGS}}"}'| jq
+    requires:
+      vars: [CLI_ARGS]
+    silent: true
+
+  list:items:
+    desc: List all items
+    cmds:
+      - curl -s {{.API_URL}}/items/ | jq
+    silent: true
+
+  build:
+    desc: Build the application
+    cmds:
+      - go build -o app
+
+  lint:
+    desc: Run linters
+    cmds:
+      - go vet ./...
+      - |
+        if command -v golangci-lint >/dev/null 2>&1; then
+          golangci-lint run
+        else
+          echo "golangci-lint is not installed"
+        fi
+
+  # Example usage:
+  # task create:item -- "My Test Item"
+  # task list:items
