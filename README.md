@@ -87,18 +87,15 @@ Add the following configuration to your `.vscode/launch.json`:
 ```mermaid
 graph TB
     subgraph Docker Build Stages
-        base[Base Builder<br/>golang:1.23.4-alpine]
-        debug_build[Debug Build Stage<br/>+ Delve debugger]
-        dev_build[Dev Build Stage<br/>Standard build]
-        prod_build[Prod Build Stage<br/>Optimized build]
+        base[Base Stage<br/>golang:1.23.4-alpine<br/>+ git]
         
-        base --> debug_build
-        base --> dev_build
-        base --> prod_build
+        dev[Development Stage<br/>+ Delve debugger<br/>+ bash]
+        prod[Production Stage<br/>Build binary]
+        final[Final Stage<br/>scratch image]
         
-        debug_build --> debug_img[Debug Image<br/>alpine + libc6-compat]
-        dev_build --> dev_img[Dev Image<br/>alpine + certs]
-        prod_build --> prod_img[Prod Image<br/>scratch + certs]
+        base --> dev
+        base --> prod
+        prod --> final
     end
     
     subgraph Runtime Architecture
@@ -123,9 +120,9 @@ graph TB
     end
 
     style base fill:#f9f,stroke:#333
-    style debug_build fill:#bbf,stroke:#333
-    style dev_build fill:#bfb,stroke:#333
-    style prod_build fill:#fbb,stroke:#333
+    style dev fill:#bbf,stroke:#333
+    style prod fill:#bfb,stroke:#333
+    style final fill:#fbb,stroke:#333
     style app fill:#9cf,stroke:#333
     style db fill:#fc9,stroke:#333
 ```

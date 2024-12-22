@@ -2,6 +2,7 @@ version: '3'
 
 vars:
   API_URL: http://localhost:8080
+  FLY_APP_NAME: '{{default "poc-fly-microservice" .FLY_APP_NAME}}'
 
 tasks:
   default:
@@ -70,18 +71,10 @@ tasks:
           echo "golangci-lint is not installed"
         fi
 
-  deploy:dev:
-    desc: Deploy the development version to Fly.io
+  deploy:
+    desc: Deploy the application to Fly.io
     cmds:
-      - DOCKER_TARGET=dev flyctl deploy --app {{.FLY_APP_NAME}}-dev
-    preconditions:
-      - sh: command -v flyctl
-        msg: "flyctl is not installed. Please install it first: https://fly.io/docs/hands-on/install-flyctl/"
-
-  deploy:prod:
-    desc: Deploy the production version to Fly.io
-    cmds:
-      - DOCKER_TARGET=prod flyctl deploy --app {{.FLY_APP_NAME}}
+      - DOCKER_TARGET=final flyctl deploy --app {{.FLY_APP_NAME}}
     preconditions:
       - sh: command -v flyctl
         msg: "flyctl is not installed. Please install it first: https://fly.io/docs/hands-on/install-flyctl/"
