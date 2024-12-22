@@ -82,6 +82,54 @@ Add the following configuration to your `.vscode/launch.json`:
      - Local: `$PROJECT_DIR$`
      - Remote: `/app`
 
+## Architecture
+
+```mermaid
+graph TB
+    subgraph Docker Build Stages
+        base[Base Builder<br/>golang:1.23.4-alpine]
+        debug_build[Debug Build Stage<br/>+ Delve debugger]
+        dev_build[Dev Build Stage<br/>Standard build]
+        prod_build[Prod Build Stage<br/>Optimized build]
+        
+        base --> debug_build
+        base --> dev_build
+        base --> prod_build
+        
+        debug_build --> debug_img[Debug Image<br/>alpine + libc6-compat]
+        dev_build --> dev_img[Dev Image<br/>alpine + certs]
+        prod_build --> prod_img[Prod Image<br/>scratch + certs]
+    end
+    
+    subgraph Runtime Architecture
+        client[Client]
+        
+        subgraph Fly.io Platform
+            app[Go Microservice<br/>Auto-shutdown]
+            db[(PostgreSQL)]
+            
+            app -- "Tracks activity" --> app
+            app -- "CRUD operations" --> db
+        end
+        
+        client -- "HTTP Requests" --> app
+        
+        subgraph Local Development
+            debug[Debug Mode<br/>:40000]
+            vscode[VS Code]
+            
+            vscode -- "Remote Debug" --> debug
+        end
+    end
+
+    style base fill:#f9f,stroke:#333
+    style debug_build fill:#bbf,stroke:#333
+    style dev_build fill:#bfb,stroke:#333
+    style prod_build fill:#fbb,stroke:#333
+    style app fill:#9cf,stroke:#333
+    style db fill:#fc9,stroke:#333
+```
+
 ## API Endpoints
 
 - `GET /health` - Health check endpoint
