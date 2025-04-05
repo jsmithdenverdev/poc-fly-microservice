@@ -12,19 +12,19 @@ import (
 
 // NewServer creates a new HTTP server
 func NewServer(ctx context.Context, stop context.CancelFunc, cfg Config, h slog.Handler) http.Handler {
-	t := template.Must(template.ParseFS(resources, "templates/*"))
+	templates := template.Must(template.ParseFS(resources, "templates/*"))
 	mux := http.NewServeMux()
 
-	addRoutes(mux, cfg, h, t)
+	addRoutes(mux, cfg, h, templates)
 
 	var handler http.Handler = mux
 
 	// Add inactivity timeout middleware
 	if cfg.EnableInactivityTimeout {
-		w := inactivity.NewWatchdog(time.Duration(cfg.InactivityTimeout)*time.Second, h, func() {
+		i := inactivity.New(time.Duration(cfg.InactivityTimeout)*time.Second, func() {
 			stop()
 		})
-		handler = w.Middleware(handler)
+		handler = i.Wrap(handler)
 	}
 
 	return handler
