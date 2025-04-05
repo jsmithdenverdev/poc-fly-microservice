@@ -31,9 +31,9 @@ func run(ctx context.Context) error {
 		return fmt.Errorf("failed to parse config: %w", err)
 	}
 
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-
-	svr := app.NewServer(ctx, cancel, cfg, logger)
+	h := slog.NewJSONHandler(os.Stdout, nil)
+	logger := slog.New(h)
+	svr := app.NewServer(ctx, cancel, cfg, h)
 	httpServer := &http.Server{
 		Addr:    net.JoinHostPort(cfg.AppHost, cfg.AppPort),
 		Handler: svr,

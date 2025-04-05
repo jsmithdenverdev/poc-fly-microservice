@@ -8,11 +8,13 @@ import (
 )
 
 // healthHandler handles health checks
-func healthHandler(cfg Config, logger *slog.Logger, t *template.Template) http.Handler {
+func healthHandler(cfg Config, h slog.Handler, t *template.Template) http.Handler {
 	type healthResponse struct {
 		Message string `json:"message"`
 		Region  string `json:"region"`
 	}
+
+	logger := slog.New(h)
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		logger.InfoContext(r.Context(), "health check")
