@@ -1,7 +1,7 @@
 # ========================================
 # BASE STAGE
 # ========================================
-FROM golang:1.23.4-alpine AS base
+FROM golang:1.24.2-alpine AS base
 WORKDIR /app
 
 RUN apk add --no-cache git
@@ -18,7 +18,7 @@ COPY . .
 RUN go mod download
 
 EXPOSE 40000 8080
-CMD ["dlv", "debug", "--headless", "--listen=:40000", "--api-version=2", "--log", "./main.go"]
+CMD ["dlv", "debug", "--headless", "--listen=:40000", "--api-version=2", "--log", "./cmd/app/main.go"]
 
 # ========================================
 # PRODUCTION STAGE
@@ -30,9 +30,9 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 # Copy all source files
-COPY *.go ./
+COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o main .
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o main ./cmd/app/*.go
 
 # ========================================
 # FINAL STAGE
