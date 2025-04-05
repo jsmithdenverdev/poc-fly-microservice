@@ -1,8 +1,9 @@
-version: '3'
+version: "3"
 
 vars:
   API_URL: http://localhost:8080
   FLY_APP_NAME: '{{default "poc-fly-microservice" .FLY_APP_NAME}}'
+  DOCKER_IMAGE: poc-fly-microservice
 
 tasks:
   default:
@@ -33,26 +34,6 @@ tasks:
     cmds:
       - curl -s {{.API_URL}}/health | jq '.'
 
-  create:item:
-    desc: Create a new item
-    vars:
-      API_URL: '{{default "http://localhost:8080" .API_URL}}'
-    cmds:
-      - echo "{{.CLI_ARGS}}"
-      - |
-        curl -s -X POST {{.API_URL}}/items \
-          -H "Content-Type: application/json" \
-          -d '{"name":"{{.CLI_ARGS}}"}' | jq '.'
-    requires:
-      vars: [CLI_ARGS]
-    silent: true
-
-  list:items:
-    desc: List all items
-    cmds:
-      - curl -s {{.API_URL}}/items/ | jq '.'
-    silent: true
-
   build:
     desc: Build Docker image for specified environment (debug/dev/prod)
     cmds:
@@ -82,14 +63,14 @@ tasks:
   build:local:
     desc: Build the local Docker image
     cmds:
-      - docker build -t {{.DOCKER_IMAGE}}:local -f Dockerfile.local .
+      - task build TARGET=local
 
   build:dev:
     desc: Build the development Docker image
     cmds:
-      - docker build -t {{.DOCKER_IMAGE}}:dev -f Dockerfile.dev .
+      - task build TARGET=dev
 
   build:prod:
     desc: Build the production Docker image
     cmds:
-      - docker build -t {{.DOCKER_IMAGE}}:prod -f Dockerfile.prod .
+      - task build TARGET=prod

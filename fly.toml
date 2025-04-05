@@ -1,4 +1,4 @@
-# fly.toml app configuration file generated for poc-fly-microservice on 2024-12-21T14:55:22-07:00
+# fly.toml app configuration file generated for poc-fly-microservice on 2025-04-05T13:24:34-06:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
@@ -6,21 +6,24 @@
 app = 'poc-fly-microservice'
 primary_region = 'den'
 
-[env]
-  FLY_SCALE_TO_ZERO = "1h"
-
-
 [build]
 
+[env]
+APP_HOST = '0.0.0.0'
+APP_PORT = '40000'
+ENABLE_INACTIVITY_TIMEOUT = 'true'
+FLY_SCALE_TO_ZERO = '1h'
+INACTIVITY_TIMEOUT = '60'
+
 [http_service]
-  internal_port = 8080
-  force_https = true
-  auto_stop_machines = 'stop'
-  auto_start_machines = true
-  min_machines_running = 0
-  processes = ['app']
+internal_port = 40000
+force_https = true
+auto_stop_machines = 'stop'
+auto_start_machines = true
+min_machines_running = 0
+processes = ['app']
 
 [[vm]]
-  memory = '1gb'
-  cpu_kind = 'shared'
-  cpus = 1
+memory = '1gb'
+cpu_kind = 'shared'
+cpus = 1

@@ -1,0 +1,8 @@
+.git
+.github
+.gitignore
+.env.example
+fly.toml
+Dockerfile
+README.md
+Taskfile.yml
