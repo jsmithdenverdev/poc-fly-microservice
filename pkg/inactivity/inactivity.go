@@ -42,6 +42,14 @@ func (i *Inactivity) Wrap(next http.Handler) http.Handler {
 	})
 }
 
+func (i *Inactivity) Shutdown() {
+	i.mu.Lock()
+	defer i.mu.Unlock()
+	if i.timer != nil {
+		i.timer.Stop()
+	}
+}
+
 func (i *Inactivity) increment() {
 	i.mu.Lock()
 	defer i.mu.Unlock()
